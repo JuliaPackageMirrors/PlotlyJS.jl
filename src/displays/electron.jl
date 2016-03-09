@@ -39,6 +39,7 @@ js_loaded(ed::ElectronDisplay) = ed.js_loaded
 function loadjs(ed::ElectronDisplay)
     if !ed.js_loaded
         Blink.load!(get_window(ed), _js_path)
+        Blink.load!(get_window(ed), _finance_js_path)
         ed.js_loaded = true
     end
 end

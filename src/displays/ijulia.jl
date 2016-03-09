@@ -24,6 +24,7 @@ if isdefined(Main, :IJulia) && Main.IJulia.inited
         </script>
         <script type="text/javascript">
             $(open(readall, _js_path, "r"))
+            $(open(readall, _finance_js_path, "r"))
         </script>
      """)
     display("text/html", "<p>Plotly javascript loaded.</p>")

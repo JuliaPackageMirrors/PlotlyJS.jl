@@ -18,6 +18,39 @@ function JSON._print(io::IO, state::JSON.State, a::GenericTrace)
     JSON.end_object(io, state, true)
 end
 
+function JSON._print(io::IO, state::JSON.State, o::OHLCTrace)
+    func_name = o.kind == :candlestick ? "createCandlestick" :
+                                         "createOHLC"
+    Base.print(io, "PlotlyFinance.$(func_name)(")
+    JSON.start_object(io, state, true)
+    Base.print(io, JSON.prefix(state), "\"", :open, "\"", JSON.colon(state))
+    JSON._print(io, state, o.open)
+
+    for fld in (:high, :low, :close)
+        Base.print(io, ",")
+        JSON.printsp(io, state)
+        Base.print(io, "\"", fld, "\"", JSON.colon(state))
+        JSON._print(io, state, getfield(o, fld))
+    end
+
+    # now we need to handle dates separately
+    Base.print(io, ",")
+    JSON.printsp(io, state)
+    Base.print(io, "\"", :dates, "\"", JSON.colon(state))
+    JSON._print(io, state, [(year(_), month(_), day(_)) for _ in o.dates])
+
+
+    # just finished printing dates, now need to map the function over them
+    Base.print(io, ".map(function(d) { return new Date(d[0], d[1]-1, d[2]); })")
+
+    # now end object
+    JSON.end_object(io, state, true)
+
+    # now end opening parens for function and grab the data
+    Base.print(io, ").data")
+end
+
+
 JSON._print(io::IO, state::JSON.State, a::Layout) = JSON._print(io, state, a.fields)
 
 JSON._print(io::IO, state::JSON.State, a::Colors.Colorant) =

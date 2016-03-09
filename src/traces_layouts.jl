@@ -1,6 +1,25 @@
 abstract AbstractTrace
 abstract AbstractLayout
 
+type OHLCTrace <: AbstractTrace
+    open::AbstractVector
+    high::AbstractVector
+    low::AbstractVector
+    close::AbstractVector
+    dates::AbstractVector{Base.Dates.Date}
+    kind::Symbol
+
+    function OHLCTrace(o, h, l, c, d, k=:ohlc)
+        if any(h .< o) || any(h .< l) || any(h .< c)
+            error("high lower than one of open, low, or close")
+        end
+        if any(l .> o) || any(l .> h) || any(l .> c)
+            error("low higher than one of open, high, or close")
+        end
+        new(o, h, l, c, d, k)
+    end
+end
+
 type GenericTrace{T<:Associative{Symbol,Any}} <: AbstractTrace
     kind::ASCIIString
     fields::T
@@ -124,6 +143,8 @@ function _describe(x::HasFields)
         return "$(kind(x)) with fields $(join(fields, ", ", ", and "))"
     end
 end
+
+_describe{T<:AbstractTrace}(::T) = "trace of type $T"
 
 Base.writemime(io::IO, ::MIME"text/plain", g::HasFields) =
     println(io, _describe(g))

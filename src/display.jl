@@ -24,11 +24,14 @@ script_content(p::Plot) = """
 function stringmime(::MIME"text/html", p::Plot, js::Symbol=:local)
 
     if js == :local
-        script_txt = "<script src=\"$(_js_path)\"></script>"
+        script_txt = string("<script src=\"$(_js_path)\"></script>", "\n",
+                            "<script src=\"$(_finance_js_path)\"></script>")
     elseif js == :remote
-        script_txt = "<script src=\"$(_js_cdn_path)\"></script>"
+        script_txt = string("<script src=\"$(_js_cdn_path)\"></script>", "\n",
+                            "<script src=\"$(_js_finance_cdn_path)\"></script>")
     elseif js == :embed
-        script_txt = "<script>$(readall(_js_path))</script>"
+        script_txt = string("<script>$(readall(_js_path))</script>", "\n",
+                            "<script>$(readall(_finance_js_path))</script>")
     else
         msg = """
         Unknown value for argument js: $js.
